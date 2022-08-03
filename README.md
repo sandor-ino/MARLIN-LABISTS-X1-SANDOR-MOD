@@ -1,7 +1,9 @@
-# MARLIN-2.0.8-LABISTS-X1-SANDOR-MOD V1
+# MARLIN-2.0.8-LABISTS-X1-SANDOR-MOD V1.1
 # Functions test - https://www.youtube.com/watch?v=PBdJpTGQPfE
 
-Sandor Mod V1 Modified version of MARLIN 2.0.8 for LABISTS X1 mini 3d printer 
+NEW VERSION V1.1: Update notes in code and more
+
+Sandor Mod V1.1 Modified version of MARLIN 2.0.8 for LABISTS X1 mini 3d printer 
 with some changes in Marlin code, is possible to EASYTHREED X1, K1, SONDORI PICO printer 
 with ET4000 V2 card
 
