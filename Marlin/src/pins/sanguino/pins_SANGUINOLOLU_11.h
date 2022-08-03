@@ -57,8 +57,6 @@
   #define BOARD_INFO_NAME "Sanguinololu <1.2"
 #endif
 
-
-
 //
 // Limit Switches
 //
@@ -132,12 +130,12 @@
 #define SDSS                                  31
 
 #if IS_MELZI
-  #define LED_PIN                             27
+  #define LED_PIN                             -1 // SANDOR MOD V3
 #elif MB(STB_11)
   #define LCD_BACKLIGHT_PIN                   17  // LCD backlight LED
 #endif
 
-#if NONE(SPINDLE_FEATURE, LASER_FEATURE) && ENABLED(SANGUINOLOLU_V_1_2) && !BOTH(IS_ULTRA_LCD, IS_NEWPANEL) // try to use IO Header
+#if !HAS_CUTTER && ENABLED(SANGUINOLOLU_V_1_2) && !BOTH(HAS_WIRED_LCD, IS_NEWPANEL) // try to use IO Header
   #define CASE_LIGHT_PIN                       4  // Hardware PWM  - see if IO Header is available
 #endif
 
@@ -167,7 +165,7 @@
       #define KILL_PIN                        10
       #define BEEPER_PIN                      27
 
-    #elif ENABLED(U8GLIB_ST7920)                  // SPI GLCD 12864 ST7920 ( like [www.digole.com] ) For Melzi V2.0
+    #elif IS_U8GLIB_ST7920                  // SPI GLCD 12864 ST7920 ( like [www.digole.com] ) For Melzi V2.0
 
       #if IS_MELZI
         #define LCD_PINS_RS                   30  // CS chip select /SS chip slave select
@@ -188,7 +186,7 @@
 
     #else
 
-      #define DOGLCD_A0                       -1  // MOD SANDOR ///
+      #define DOGLCD_A0                       -1  // SANDOR MOD V3
 
       #if ENABLED(MAKRPANEL)
 
@@ -198,8 +196,8 @@
 
       #elif IS_MELZI
 
-        #define BEEPER_PIN                    -1  // MOD SANDOR ///
-        #define DOGLCD_CS                     -1  // MOD SANDOR ///
+        #define BEEPER_PIN                    -1   // SANDOR MOD V3
+        #define DOGLCD_CS                     -1   // SANDOR MOD V3
 
       #else                                       // !MAKRPANEL
 
@@ -209,11 +207,7 @@
 
     #endif
 
-    // Uncomment screen orientation
-    //#define LCD_SCREEN_ROT_0
-    //#define LCD_SCREEN_ROT_90
-    #define LCD_SCREEN_ROT_180  /// MOD SANDOR ///
-    //#define LCD_SCREEN_ROT_270
+    #define LCD_SCREEN_ROTATE              180   // SANDOR MOD V3 // 0, 90, 180, 270
 
   #elif ENABLED(ZONESTAR_LCD)                     // For the Tronxy Melzi boards
 
@@ -258,14 +252,14 @@
 
   #else                                           // !LCD_FOR_MELZI && !ZONESTAR_LCD && !LCD_I2C_PANELOLU2
 
-    #define BTN_ENC                           30  // MOD SANDOR ///
+    #define BTN_ENC                           30  // SANDOR MOD V3
     //#define LCD_SDSS                          -1  // Smart Controller SD card reader rather than the Melzi
 
   #endif
 
   #if IS_NEWPANEL && !defined(BTN_EN1)
-    #define BTN_EN1                           11
-    #define BTN_EN2                           10
+    #define BTN_EN1                           29  // SANDOR MOD V3
+    #define BTN_EN2                           28  // SANDOR MOD V3
   #endif
 
 #endif // HAS_WIRED_LCD
@@ -274,7 +268,7 @@
 // M3/M4/M5 - Spindle/Laser Control
 //
 #if HAS_CUTTER
-  #if !MB(AZTEEG_X1) && ENABLED(SANGUINOLOLU_V_1_2) && !BOTH(IS_ULTRA_LCD, IS_NEWPANEL) // try to use IO Header
+  #if !MB(AZTEEG_X1) && ENABLED(SANGUINOLOLU_V_1_2) && !BOTH(HAS_WIRED_LCD, IS_NEWPANEL) // try to use IO Header
 
     #define SPINDLE_LASER_ENA_PIN             10  // Pullup or pulldown!
     #define SPINDLE_LASER_PWM_PIN              4  // Hardware PWM
