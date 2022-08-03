@@ -1,10 +1,12 @@
 # Marlin-2.0.9.2 LABISTS-X1-SANDOR MOD V2
- Custom firmware Mod V2 MARLIN 2.0.9.2 for LABISTS X1 mini 3d printer  with some changes in Malin code,  is possible to  EASYTHREED X1, K1 and SONDORI PICO printer with  ET4000 V2 card
+Sandor Mod V2 Modified version of MARLIN 2.0.9.2 for LABISTS X1 mini 3d printer with some changes in Marlin code, is possible to EASYTHREED X1, K1, SONDORI PICO printer with ET4000 V2 card
+
 VIDEO TEST LINK:
 https://youtu.be/KjyCzkallvk
 
 SANDOR MOD V2 11_2021
 FAN, BED, LCD + ENCODER, ARDUINO, RGB LED
+
 CUSTOM BUTTON FUNCTION
 
 - HOME BUTTON
@@ -32,3 +34,5 @@ use the function only to rectify manual calibration to avoid of ruining the bed
 special function:
 During printing by pressing the + or - change the RGB LED effect
 There are 8 possibilities of choice including off, modifying the RGB.Lib library the desired effects are obtained 
+
+![alt text](https://github.com/sandor-ino/MARLIN-2.0.8-LABISTS-X1-SANDOR-MOD/blob/SANDOR-MOD-V2/PINOUT%20sandor%20mod%20v2.jpg)
