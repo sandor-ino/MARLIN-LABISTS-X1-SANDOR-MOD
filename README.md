@@ -39,3 +39,7 @@ use the function only to rectify manual calibration to avoid of ruining the bed
 special function:
 During printing by pressing the + or - change the RGB LED effect
 There are 8 possibilities of choice including off, modifying the RGB.Lib library the desired effects are obtained 
+
+![alt text](https://github.com/sandor-ino/MARLIN-2.0.8-LABISTS-X1-SANDOR-MOD/blob/SANDOR-MOD-V3/PINOUT%20sandor%20mod%20v3.jpg)
+![alt text](https://github.com/sandor-ino/MARLIN-2.0.8-LABISTS-X1-SANDOR-MOD/blob/SANDOR-MOD-V3/ESP01S%20SETUP%20PINOUT.jpg)
+
