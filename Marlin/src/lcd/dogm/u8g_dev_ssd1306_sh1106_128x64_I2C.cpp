@@ -170,7 +170,7 @@ u8g_dev_t u8g_dev_sh1106_128x64_2x_i2c_2_wire = { u8g_dev_sh1106_128x64_2x_2_wir
 
 static const uint8_t u8g_dev_ssd1306_128x64_data_start_2_wire[] PROGMEM = {
   0x010,          // set upper 4 bit of the col adr to 0
-  0x000,          // set lower 4 bit of the col adr to 0 
+  0x000,          // set lower 4 bit of the col adr to 0
   U8G_ESC_END     // end of sequence
 };
 

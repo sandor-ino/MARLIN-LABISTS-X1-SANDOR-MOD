@@ -84,7 +84,7 @@ void TWIBus::send() {
 void TWIBus::echoprefix(uint8_t bytes, const char pref[], uint8_t adr) {
   SERIAL_ECHO_START();
   SERIAL_ECHOPGM_P(pref);
-  SERIAL_ECHOPAIR(": from:", adr, " bytes:", bytes, " data:");
+  SERIAL_ECHOPGM(": from:", adr, " bytes:", bytes, " data:");
 }
 
 // static
@@ -159,10 +159,10 @@ void TWIBus::flush() {
 
   void i2c_on_receive(int bytes) { // just echo all bytes received to serial
     i2c.receive(bytes);
-  }
+   }
 
   void i2c_on_request() {          // just send dummy data for now
-    i2c.reply("Hello World!\n");
+    i2c.reply("1");
   }
 
 #endif

@@ -57,15 +57,9 @@
   #define BOARD_INFO_NAME "Sanguinololu <1.2"
 #endif
 
-///// MOD SANDOR /////
 
-#define STARTK_PIN    30          
-#define PLUSK_PIN     29     
-#define MINUSK_PIN    28    
-#define Z_HOME_PIN     5  		
 
-///// MOD SANDOR END ////
-
+//
 // Limit Switches
 //
 #define X_STOP_PIN                            18
@@ -77,15 +71,12 @@
 //
 #define X_STEP_PIN                            15
 #define X_DIR_PIN                             21
-#define X_STOP_PIN                   18 // MOD SANDOR //
 
 #define Y_STEP_PIN                            22
 #define Y_DIR_PIN                             23
-#define Y_STOP_PIN                    19 // MOD SANDOR //
 
 #define Z_STEP_PIN                             3
 #define Z_DIR_PIN                              2
-#define Z_STOP_PIN                    20 // MOD SANDOR //
 
 #define E0_STEP_PIN                            1
 #define E0_DIR_PIN                             0
@@ -116,10 +107,10 @@
 #else
 
   #define HEATER_BED_PIN                      14  // (bed)
-  #define X_ENABLE_PIN                        -1
-  #define Y_ENABLE_PIN                        -1
-  #define Z_ENABLE_PIN                        -1
-  #define E0_ENABLE_PIN                       -1
+  #define X_ENABLE_PIN                         4
+  #define Y_ENABLE_PIN                         4
+  #define Z_ENABLE_PIN                         4
+  #define E0_ENABLE_PIN                        4
 
 #endif
 
@@ -176,16 +167,6 @@
       #define KILL_PIN                        10
       #define BEEPER_PIN                      27
 
-      #ifndef BOARD_ST7920_DELAY_1
-        #define BOARD_ST7920_DELAY_1 DELAY_NS(0)
-      #endif
-      #ifndef BOARD_ST7920_DELAY_2
-        #define BOARD_ST7920_DELAY_2 DELAY_NS(188)
-      #endif
-      #ifndef BOARD_ST7920_DELAY_3
-        #define BOARD_ST7920_DELAY_3 DELAY_NS(0)
-      #endif
-
     #elif ENABLED(U8GLIB_ST7920)                  // SPI GLCD 12864 ST7920 ( like [www.digole.com] ) For Melzi V2.0
 
       #if IS_MELZI
@@ -196,22 +177,9 @@
         // Marlin so this can be used for BEEPER_PIN. You can use this pin
         // with M42 instead of BEEPER_PIN.
         #define BEEPER_PIN                    27
-
-        #if IS_RRD_FG_SC
-          #ifndef BOARD_ST7920_DELAY_1
-            #define BOARD_ST7920_DELAY_1 DELAY_NS(0)
-          #endif
-          #ifndef BOARD_ST7920_DELAY_2
-            #define BOARD_ST7920_DELAY_2 DELAY_NS(188)
-          #endif
-          #ifndef BOARD_ST7920_DELAY_3
-            #define BOARD_ST7920_DELAY_3 DELAY_NS(0)
-          #endif
-        #endif
-
       #else                                       // Sanguinololu >=1.3
-        #define LCD_PINS_RS                   17
-        #define LCD_PINS_ENABLE               16
+        #define LCD_PINS_RS                    4
+        #define LCD_PINS_ENABLE               17
         #define LCD_PINS_D4                   30
         #define LCD_PINS_D5                   29
         #define LCD_PINS_D6                   28
@@ -258,8 +226,8 @@
 
   #else
 
-    #define LCD_PINS_RS                       17
-    #define LCD_PINS_ENABLE                   16
+    #define LCD_PINS_RS                        4
+    #define LCD_PINS_ENABLE                   17
     #define LCD_PINS_D4                       30
     #define LCD_PINS_D5                       29
     #define LCD_PINS_D6                       28
@@ -290,7 +258,7 @@
 
   #else                                           // !LCD_FOR_MELZI && !ZONESTAR_LCD && !LCD_I2C_PANELOLU2
 
-    #define BTN_ENC                           6  // MOD SANDOR ///
+    #define BTN_ENC                           30  // MOD SANDOR ///
     //#define LCD_SDSS                          -1  // Smart Controller SD card reader rather than the Melzi
 
   #endif

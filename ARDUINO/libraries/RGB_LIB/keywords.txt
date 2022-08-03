@@ -1,0 +1,16 @@
+#######################################
+# Syntax Coloring Map For RGB_LIB
+#######################################
+
+RGB_LIB	KEYWORD1
+
+setColor	KEYWORD2
+defaultColor	KEYWORD2
+fadeRainbow	KEYWORD2
+fadeR	KEYWORD2
+fadeG	KEYWORD2
+fadeB	KEYWORD2
+fadeRG	KEYWORD2
+fadeRB	KEYWORD2
+fadeGB	KEYWORD2
+fadeRGB	KEYWORD2
