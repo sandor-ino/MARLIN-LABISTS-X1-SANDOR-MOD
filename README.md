@@ -1,7 +1,5 @@
 # Marlin-bugfix-2.1.X LABISTS-X1-SANDOR MOD V3 (BETA)
 
-# (Work in progress, available shortly)
-
 Custom firmware Mod V3 MARLIN bugfix-2.1.X for LABISTS X1 mini 3d printer  with some changes in Malin code,  is possible to  EASYTHREED X1, K1 and SONDORI PICO printer with  ET4000 V2 card
 
 VIDEO TEST LINK:
