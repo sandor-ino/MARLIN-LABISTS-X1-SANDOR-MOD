@@ -29,40 +29,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ezButton_h
-#define ezButton_h
+#ifndef ezOutput_h
+#define ezOutput_h
 
 #include <Arduino.h>
 
-#define COUNT_FALLING 0
-#define COUNT_RISING  1
-#define COUNT_BOTH    2
+#define BLINK_STATE_DISABLE 0
+#define BLINK_STATE_DELAY   1
+#define BLINK_STATE_BLINK   2
 
-class ezButton
+class ezOutput
 {
 	private:
-		int btnPin;
-		unsigned long debounceTime;
-		unsigned long count;
-		int countMode;
+		int _outputPin;
+		int _outputState;
+		int _blinkState;
 
-		int previousSteadyState;  // the previous steady state from the input pin, used to detect pressed and released event
-		int lastSteadyState;      // the last steady state from the input pin
-		int lastFlickerableState; // the last flickerable state from the input pin
-		int currentState;         // the current reading from the input pin
-
-		unsigned long lastDebounceTime; // the last time the output pin was toggled
+		unsigned long _highTime;
+		unsigned long _lowTime;
+		unsigned long _startTime;
+		unsigned long _blinkTimes;
+		unsigned long _lastBlinkTime; // the last time the output pin was blinked
 
 	public:
-		ezButton(int pin);
-		void setDebounceTime(unsigned long time);
+		ezOutput(int pin);
+		void high(void);
+		void low(void);
+		void toggle(void);
+		void toggle(unsigned long delayTime);
+
+		void pulse(unsigned long pulseTime);
+		void pulse(unsigned long pulseTime, unsigned long delayTime);
+
+		void blink(unsigned long lowTime, unsigned long highTime);
+		void blink(unsigned long lowTime, unsigned long highTime, unsigned long delayTime);
+
+		void blink(unsigned long lowTime, unsigned long highTime, unsigned long delayTime, long blinkTimes);
 		int getState(void);
-		int getStateRaw(void);
-		bool isPressed(void);
-		bool isReleased(void);
-		void setCountMode(int mode);
-		unsigned long getCount(void);
-		void resetCount(void);
 		void loop(void);
 };
 

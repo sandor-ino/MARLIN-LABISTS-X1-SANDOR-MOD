@@ -1,6 +1,7 @@
 /*
   SANDOR MOD V2 11_2021 - LABISTS X1
-  
+  SANDOR MOD V3 06_2022 - LABISTS X1
+
   RGB_LIB.cpp - Libreria di esempio per gestire
   l'accensione, lo spegnimento, il lampeggio
   e la dissolvenza incrociata di un LED RGB.

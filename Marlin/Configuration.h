@@ -719,7 +719,7 @@
  */
 //#define PIDTEMPBED
 
-//#define BED_LIMIT_SWITCHING
+#define BED_LIMIT_SWITCHING // SANDOR MOD V3
 
 /**
  * Max Bed Power
@@ -1037,7 +1037,7 @@
  * Override with M201
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 300, 300, 200, 300 } /// SANDOR MOD LABISTS X1 ///
+#define DEFAULT_MAX_ACCELERATION      { 300, 300, 100, 300 } /// SANDOR MOD LABISTS X1 ///
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
 #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
@@ -1107,7 +1107,7 @@
  *
  * See https://github.com/synthetos/TinyG/wiki/Jerk-Controlled-Motion-Explained
  */
-#define S_CURVE_ACCELERATION /// ??? ///
+#define S_CURVE_ACCELERATION /// SANDOR MOD ///
 
 //===========================================================================
 //============================= Z Probe Options =============================
@@ -3087,7 +3087,7 @@
 // (ms) Delay before the next move will start, to give the servo time to reach its target angle.
 // 300ms is a good value but you can try less delay.
 // If the servo can't reach the requested position, increase it.
-//#define SERVO_DELAY { 300 } /// ??? ///
+#define SERVO_DELAY { 500 } /// ??? ///
 
 // Only power servos during movement, otherwise leave off to prevent jitter
 //#define DEACTIVATE_SERVOS_AFTER_MOVE

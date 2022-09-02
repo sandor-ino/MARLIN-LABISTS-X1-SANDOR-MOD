@@ -394,8 +394,10 @@ void startOrResumeJob() {
 
   volatile byte arduino_event = 0;
   volatile byte marlin_event = 0;
-  byte a = 0;
   int liv = 0;
+  int axix;
+  int axiy;
+  int axiz;
   unsigned long tempo;
   bool calibra = false;
   bool printon = false;
@@ -406,6 +408,8 @@ void startOrResumeJob() {
   bool hotendon = false;
   bool hotendhot = false;
   bool moveaxis = false;
+  bool getaxis = false;
+  bool ardumod = false;
   char answer;
 
   void sendEvent()
@@ -450,8 +454,7 @@ void startOrResumeJob() {
 
   void SANDOR_MOD_V3()
   {
-
-    if (arduino_event == 0 && marlin_event == 0) // se fermo verifica lo marlin_event di arduino
+    if (marlin_event == 0 && arduino_event == 0) // se fermo richiedi arduino_event
     {
       captureEvent();
     }
@@ -459,45 +462,41 @@ void startOrResumeJob() {
     {
       switch (arduino_event) // verifica arduino
       {
-      case 0:                   // apetta la fine del comando e spegnere tutto
+      case 0: // ferma
         if (!planner.has_blocks_queued())
         {
           if (thermalManager.degTargetHotend(active_extruder) > 0)
           {
             thermalManager.setTargetHotend(active_extruder, 0);
-            hotendhot = false;
-            hotendon = false;
           }
           if (thermalManager.degTargetBed() > 0)
           {
             thermalManager.setTargetBed(0);
+          }
+          if (bedhot == true || bedhot == true)
+          {
             bedhot = false;
             bedon = false;
           }
+          if (hotendhot == true || hotendon == true)
+          {
+            hotendhot = false;
+            hotendon = false;
+          }
+          if (printon == true || printpause == true)
+          {
+            printon = false;
+            printpause = false;
+          }
+          if (ardumod == true)
+            ardumod = false;
           LCD_MESSAGE(WELCOME_MSG);
           marlin_event = 0;
           sendEvent();
         }
         break;
-      case 8: /// estrude nuovamente
-        marlin_event = 8;
-        sendEvent();
-        arduino_event = 13;
-        marlin_event = 28;
-        break;
-      case 9: /// livellamento piatto passo successivo
-        if (!planner.has_blocks_queued())
-        {
-          calibra = true;
-          marlin_event = 9;
-          sendEvent();
-          arduino_event = 14;
-          marlin_event = 2;
-          liv += 1;
-          sendEvent();
-        }
-        break;
-      case 11: // HOME BUTTON
+      case 10: // HOME BUTTON
+        ardumod = true;
         switch (marlin_event)
         {
         case 0: // comando Z_HOME
@@ -505,109 +504,158 @@ void startOrResumeJob() {
           DISABLE_AXIS_X();
           DISABLE_AXIS_Y();
           queue.enqueue_one_now("G28 Z0");
-          marlin_event = 1;
+          marlin_event = 10;
           sendEvent();
           break;
-        case 1:
+        case 10:
           if (destination.z == current_position.z)
           {
             arduino_event = 0;
           }
           break;
-        case 25:
+        case 21:
+          arduino_event = 0;
+          break;
+        case 31:
           arduino_event = 0;
           break;
         default:
           break;
         }
         break;
-      case 12: // MINUS BUTTON
+      case 20: // MINUS BUTTON
+        ardumod = true;
         switch (marlin_event)
         {
         case 0: // avvio preriscaldamento
-          LCD_MESSAGE(MSG_PREHEAT_1);
+          LCD_MESSAGE(MSG_HEATING);
           thermalManager.setTargetHotend(PREHEAT_1_TEMP_HOTEND, active_extruder);
+          marlin_event = 20;
+          sendEvent();
           break;
 
-        case 28: // caldo e pronto a estrudere
-          LCD_MESSAGE(MSG_EXTRUDE);
-          retract_filament();
-          tempo = (millis() + 5000UL);
-          marlin_event = 29;
-          sendEvent();
-          if (current_position.e == destination.e)
+        case 20: // sta scaldando
+          if (thermalManager.degHotend(active_extruder) >= thermalManager.degTargetHotend(active_extruder))
           {
-            marlin_event = 1;
+            LCD_MESSAGE(MSG_EXTRUDE);
+            retract_filament();
+            marlin_event = 21;
+            sendEvent();
+          }
+          else
+          {
+            captureEvent(); // attende comando annulla
           }
           break;
 
-        case 1: // attende 5 secondi e spegne tutto
+        case 21: // target temperatura caldo
+          if (!planner.has_blocks_queued())
+          {
+            if (current_position.e == destination.e)
+            {
+              marlin_event = 22;
+            }
+          }
+          break;
+
+        case 22: // estrusione in corso
+          LCD_MESSAGE(MSG_PLEASE_WAIT);
+          marlin_event = 23;
+          sendEvent();
+          tempo = (millis() + 5000UL);
+          break;
+
+        case 23: // attende 5 secondi e spegne tutto
           if (tempo < millis())
           {
             arduino_event = 0;
           }
           break;
-
         default:
           break;
         }
         break;
-      case 13: // PLUS BUTTON
+      case 30: // PLUS BUTTON
+        ardumod = true;
         switch (marlin_event)
         {
         case 0: // avvio preriscaldamento
-          LCD_MESSAGE(MSG_PREHEAT_1);
+          LCD_MESSAGE(MSG_HEATING);
           thermalManager.setTargetHotend(PREHEAT_1_TEMP_HOTEND, active_extruder);
-          break;
-
-        case 28: // target temperatura caldo
-          LCD_MESSAGE(MSG_EXTRUDE);
-          marlin_event = 29;
+          marlin_event = 30;
           sendEvent();
-          feed_filament(); // estrusione
           break;
-        case 29: // attende termine estrusione
-          if (current_position.e == destination.e)
+
+        case 30: // sta scaldando
+          if (thermalManager.degHotend(active_extruder) >= thermalManager.degTargetHotend(active_extruder))
           {
-            marlin_event = 1;
-          }
-          break;
-        case 1: // dopo estrusione resta caldo
-          if (!planner.has_blocks_queued())
-          { // quando fermo resta caldo
-
-            LCD_MESSAGE(MSG_REHEATDONE);
-            tempo = (millis() + 120000UL);
-            marlin_event = 28;
+            LCD_MESSAGE(MSG_EXTRUDE);
+            feed_filament(); // estrusione
+            marlin_event = 31;
             sendEvent();
-            marlin_event = 2;
+          }
+          else
+          {
+            captureEvent(); // attende comando annulla
           }
           break;
 
-        case 2: //  attende comando o spegne tutto dopo 2 minuti
+        case 31: // target temperatura caldo
+          if (!planner.has_blocks_queued())
+          {
+            if (current_position.e == destination.e)
+            {
+              marlin_event = 32;
+            }
+          }
+          break;
+
+        case 32: // attesa fine estrusione
+          tempo = (millis() + 120000UL);
+          LCD_MESSAGE(MSG_USERWAIT);
+          marlin_event = 33;
+          sendEvent();
+          break;
+
+        case 33: //  attende comando o spegne dopo 2 minuti
           if (tempo < millis())
           {
             arduino_event = 0;
           }
           else
-            captureEvent(); // attende comando, stop (home), estrude (+)
+          {
+            captureEvent(); // attende comando annulla
+          }
           break;
         default:
           break;
         }
         break;
-      case 14: // PLAY BUTTON NORMAL PRESS
+      case 35: // estrude nuovamente
+        ardumod = true;
+        {
+
+          marlin_event = 35;
+          sendEvent();
+          arduino_event = 30;
+          marlin_event = 30;
+          break;
+        }
+      case 40: // PLAY BUTTON NORMAL PRESS
+        ardumod = true;
         switch (marlin_event)
         {
-        case 0:                    // avvio preriscaldamento
+        case 0:
+
           if (!all_axes_homed()) // se non conosce gli assi va in auto home altrimenti alza asse z di 10 mm
           {
             LCD_MESSAGE(MSG_AUTO_HOME);
-            queue.inject_P(PSTR("G28"));
+            queue.inject_P(G28_STR);
           }
           else
           {
             LCD_MESSAGE(MSG_MOVE_Z);
+
             if (current_position[Z_AXIS] < 90) // limite z  90 mm
             {
               destination[Z_AXIS] = current_position[Z_AXIS] + 10;
@@ -621,16 +669,16 @@ void startOrResumeJob() {
               prepare_internal_move_to_destination(feedrate_mm_s);
             }
           }
-          marlin_event = 1;
+          marlin_event = 41;
           sendEvent();
           break;
-        case 1: // attende fine spostamento assi e chiude
-          if (destination == current_position)
+        case 41: // attende fine spostamento assi e chiude
+          if (destination[Z_AXIS] == current_position[Z_AXIS])
           {
             arduino_event = 0;
           }
           break;
-        case 2: // avvio funzione livellamento piatto
+        case 42: // avvio funzione livellamento piatto
           if (calibra == true)
           {
             switch (liv)
@@ -679,45 +727,49 @@ void startOrResumeJob() {
           break;
         }
         break;
-      case 15: // PLAY BUTTON LONG PRESS
+      case 45: /// livellamento piatto passo successivo
+        ardumod = true;
+        {
+          calibra = true;
+          arduino_event = 40;
+          marlin_event = 42;
+          sendEvent();
+          liv += 1;
+          break;
+        }
+      case 50: // PLAY BUTTON LONG PRESS
+        ardumod = true;
         if (all_axes_homed())
-
         {
           if (marlin_event == 0) // avvio funzione livellamento
           {
-            arduino_event = 9;
+            arduino_event = 45;
           }
-
           else // annulla operazione livellamento e XYZ_HOME
           {
             calibra = false;
             LCD_MESSAGE(MSG_AUTO_HOME);
-            queue.inject_P(PSTR("G28"));
+            queue.inject_P(G28_STR);
             liv = 0;
-            arduino_event = 0;
+            if (destination[Z_AXIS] == current_position[Z_AXIS])
+            {
+              arduino_event = 0;
+            }
           }
         }
         else // se non li conosce trova XYZ_HOME dopo avvia livellamento
         {
           LCD_MESSAGE(MSG_AUTO_HOME);
-          queue.inject_P(PSTR("G28"));
-          arduino_event = 9;
+          queue.inject_P(G28_STR);
+
+          if (marlin_event == 0) // avvio funzione livellamento
+          {
+            arduino_event = 45;
+          }
         }
         break;
-      }
-      switch (marlin_event) // verifica marlin
-      {
-
-      case 25: /// hotend sta scaldando
-      {
-          if (arduino_event != 100)
-          {
-            captureEvent(); // attende comando annulla
-          }
-      }
-      break;
       default:
-      break;
+        break;
       }
     }
   }
@@ -1118,203 +1170,201 @@ void idle(bool no_stepper_sleep/*=false*/) {
 
   if (!printingIsActive() && !printingIsPaused())
   {
-    if (marlin_event == 20 || marlin_event == 21 || marlin_event == 201 || marlin_event == 202 || marlin_event == 203)
+    if (ardumod == false)
     {
-      printon = false;
-      printpause = false;
-      arduino_event = 0;
-      marlin_event = 0;
-      sendEvent();
-    }
-    //
-    if (arduino_event == 0 || arduino_event == 100 || arduino_event == 12 || arduino_event == 13)
-    {
-      if (all_axes_trusted()) // movimento assi da comandi esterni
+      if (arduino_event == 0 || arduino_event == 180)
       {
-        if (moveaxis == false)
+        if (all_axes_trusted()) // movimento assi da comandi esterni
         {
-          if (destination.x != planner.get_axis_position_mm(X_AXIS) || destination.y != planner.get_axis_position_mm(Y_AXIS) || destination.z != planner.get_axis_position_mm(Z_AXIS))
+          if (moveaxis == false)
           {
-            LCD_MESSAGE(MSG_MOVING);
-            moveaxis = true;
+            if (getaxis == false)
+            {
+              axix = planner.get_axis_position_mm(X_AXIS);
+              axiy = planner.get_axis_position_mm(Y_AXIS);
+              axiz = planner.get_axis_position_mm(Z_AXIS);
+              getaxis = true;
+            }
+            else
+            {
+              if (axix != planner.get_axis_position_mm(X_AXIS) || axiy != planner.get_axis_position_mm(Y_AXIS) || axiz != planner.get_axis_position_mm(Z_AXIS))
+              {
+                LCD_MESSAGE(MSG_MOVING);
+                moveaxis = true;
+                if (arduino_event == 0)
+                {
+                  arduino_event = 180;
+                }
+                marlin_event = 100;
+                sendEvent();
+              }
+            }
+          }
+          else
+          {
+            if (!planner.has_blocks_queued())
+            {
+              getaxis = false;
+              moveaxis = false;
+              arduino_event = 0;
+            }
+          }
+        }
+        else
+        {
+          // destination.x = planner.get_axis_position_mm(X_AXIS);
+          // destination.y = planner.get_axis_position_mm(Y_AXIS);
+          // destination.z = planner.get_axis_position_mm(Z_AXIS);
+        }
+
+        if (bedon == false) // letto in riscaldamento
+        {
+          if (thermalManager.degTargetBed() > 0)
+          {
+            bedon = true;
+            if (hotendon == false || hotendhot == false)
+            {
+              if (arduino_event == 0)
+              {
+                arduino_event = 180;
+              }
+              marlin_event = 101;
+              sendEvent();
+            }
+          }
+        }
+        else if (bedon == true && bedhot == false) // letto caldo
+        {
+          if (thermalManager.degBed() >= thermalManager.degTargetBed())
+          {
+            bedhot = true;
+            if (hotendon == false || hotendhot == false)
+            {
+              LCD_MESSAGE(MSG_REHEATDONE);
+              marlin_event = 102;
+              sendEvent();
+            }
+          }
+        }
+        else if (bedon == true || bedhot == true) // // spegne se raffredda
+        {
+          if (thermalManager.degTargetBed() == 0) // se bed raffredda
+          {
+            arduino_event = 0;
+          }
+        }
+
+        if (hotendon == false) // hotend in riscaldamento
+        {
+          if (thermalManager.degTargetHotend(active_extruder) > 0)
+          {
+            hotendon = true;
             if (arduino_event == 0)
             {
-              arduino_event = 100;
+              arduino_event = 180;
             }
-            marlin_event = 24;
+            marlin_event = 103;
+            sendEvent();
+          }
+        }
+        else if (hotendon == true && hotendhot == false) // hotend caldo
+        {
+          if (thermalManager.degHotend(active_extruder) >= thermalManager.degTargetHotend(active_extruder))
+          {
+            LCD_MESSAGE(MSG_REHEATDONE);
+            hotendhot = true;
+            marlin_event = 104;
+            sendEvent();
+          }
+        }
+        else if (hotendon == true || hotendhot == true) // spegne se raffredda
+        {
+          if (thermalManager.degTargetHotend(active_extruder) == 0)
+          {
+            arduino_event = 0;
+          }
+        }
+      }
+    }
+
+    if (marlin_event == 200 || marlin_event == 201 || marlin_event == 202 || marlin_event == 203 || marlin_event == 205)
+    {
+      arduino_event = 0;
+    }
+
+    if (arduino_event != 180)
+    {
+      SANDOR_MOD_V3();
+    }
+  }
+  else if (printingIsActive())
+  {
+    if (printpause == true)
+      printpause = false;
+    if (printon == false)
+    {
+      printon = true;
+    }
+    else
+    {
+      if (bedhot == false) // letto in riscaldamento
+      {
+        if (bedon == false) // letto in riscaldamento
+        {
+          if (thermalManager.degTargetBed() > 0) // letto in riscaldamento
+          {
+            bedon = true;
+            marlin_event = 210;
             sendEvent();
           }
         }
         else
         {
-          if (destination.x == planner.get_axis_position_mm(X_AXIS) && destination.y == planner.get_axis_position_mm(Y_AXIS) && destination.z == planner.get_axis_position_mm(Z_AXIS))
+          if (thermalManager.degBed() >= thermalManager.degTargetBed())
           {
-            LCD_MESSAGE(WELCOME_MSG);
-            moveaxis = false;
-            if (arduino_event == 100)
-            {
-              arduino_event = 0;
-            }
-            marlin_event = 0;
+            bedhot = true;
+          }
+        }
+      }
+      if (hotendhot == false) // hotend in riscaldamento
+      {
+        if (hotendon == false) // hotend in riscaldamento
+        {
+          if (thermalManager.degTargetHotend(active_extruder) > 0) // hotend in riscaldamento
+          {
+            hotendon = true;
+            marlin_event = 220;
             sendEvent();
           }
         }
-      }
-      else
-      {
-        // destination.x = planner.get_axis_position_mm(X_AXIS);
-        // destination.y = planner.get_axis_position_mm(Y_AXIS);
-        // destination.z = planner.get_axis_position_mm(Z_AXIS);
-      }
-
-      if (bedon == false) // letto in riscaldamento
-      {
-        if (thermalManager.degTargetBed() > 0)
+        else
         {
-          bedon = true;
-          if (arduino_event == 0)
+          if (thermalManager.degHotend(active_extruder) >= thermalManager.degTargetHotend(active_extruder))
           {
-            arduino_event = 100;
-          }
-          if (hotendon == true || hotendhot == true)
-            return;
-          marlin_event = 22;
-          sendEvent();
-        }
-      }
-      else
-      {
-        if (thermalManager.degTargetBed() == 0) /// se il piatto raffredda
-        {
-          bedon = false;
-          bedhot = false;
-
-          if (hotendon == true || hotendhot == true)
-            return;
-          LCD_MESSAGE(WELCOME_MSG);
-          if (arduino_event == 100)
-          {
-            arduino_event = 0;
-          }
-          marlin_event = 0;
-          sendEvent();
-        }
-      }
-
-      if (bedhot == false) // letto caldo
-      {
-        if (thermalManager.degBed() >= PREHEAT_1_TEMP_BED - 2)
-        {
-          bedhot = true;
-          if (hotendon == false || hotendhot == false)
-          {
-            LCD_MESSAGE(MSG_REHEATDONE);
-            marlin_event = 23;
-            sendEvent();
+            hotendhot = true;
           }
         }
       }
-      else
-      {
-        if (thermalManager.degTargetBed() == 0) /// se bed raffredda
-        {
-          bedon = false;
-          bedhot = false;
-          if (hotendon == false || hotendhot == false)
-          {
-            LCD_MESSAGE(WELCOME_MSG);
-            if (arduino_event == 100)
-            {
-              arduino_event = 0;
-            }
-            marlin_event = 0;
-            sendEvent();
-          }
-        }
-      }
-      if (hotendon == false) // hotend in riscaldamento
-      {
-        if (thermalManager.degTargetHotend(active_extruder) > 0)
-        {
-          hotendon = true;
-          if (arduino_event == 0)
-          {
-            arduino_event = 100;
-          }
-          marlin_event = 25;
-          sendEvent();
-        }
-      }
-      else
-      {
-        if (thermalManager.degTargetHotend(active_extruder) == 0)
-        {
-          LCD_MESSAGE(WELCOME_MSG);
-          hotendon = false;
-          hotendhot = false;
-          if (arduino_event == 100)
-          {
-            arduino_event = 0;
-          }
-          marlin_event = 0;
-          sendEvent();
-        }
-      }
-
-      if (hotendhot == false) // hotend caldo
-      {
-        if (thermalManager.degHotend(active_extruder) >= PREHEAT_1_TEMP_HOTEND - 2)
-        {
-          LCD_MESSAGE(MSG_REHEATDONE);
-          hotendhot = true;
-          marlin_event = 28;
-          sendEvent();
-        }
-      }
-      else
-      {
-        if (thermalManager.degTargetHotend(active_extruder) == 0)
-        {
-          hotendon = false;
-          hotendhot = false;
-          LCD_MESSAGE(WELCOME_MSG);
-          if (arduino_event == 100)
-          {
-            arduino_event = 0;
-          }
-          marlin_event = 0;
-          sendEvent();
-        }
-      }
-    }
-
-    SANDOR_MOD_V3();
-  }
-  else
-  {
-    if (printingIsActive()) // in stampa o pausa, disattiva tasti e funzioni lampeggio
-    {
-      if (printpause != false)
-        printpause = false;
-      if (printon == false)
-      {
-        arduino_event = 20;
-        marlin_event = 20;
-        sendEvent();
-        printon = true;
-      }
-      else
+      else if (hotendon == true && hotendhot == true) // solo se hotend caldo
       {
         if (ui.get_progress_percent() <= 25)
         {
 
+          if (marlin_event != 200)
+          {
+            marlin_event = 200;
+            sendEvent();
+          }
+        }
+        else if (ui.get_progress_percent() <= 50)
+        {
           if (marlin_event != 201)
           {
             marlin_event = 201;
             sendEvent();
           }
         }
-        else if (ui.get_progress_percent() <= 50)
+        else if (ui.get_progress_percent() <= 75)
         {
           if (marlin_event != 202)
           {
@@ -1322,7 +1372,7 @@ void idle(bool no_stepper_sleep/*=false*/) {
             sendEvent();
           }
         }
-        else if (ui.get_progress_percent() <= 75)
+        else if (ui.get_progress_percent() < 100)
         {
           if (marlin_event != 203)
           {
@@ -1330,76 +1380,69 @@ void idle(bool no_stepper_sleep/*=false*/) {
             sendEvent();
           }
         }
-        else if (ui.get_progress_percent() < 100)
-        {
-          if (marlin_event != 20)
-          {
-            marlin_event = 20;
-            sendEvent();
-          }
-        }
-        else if (ui.get_progress_percent() == 100)
-        {
-          if (marlin_event == 20)
-          {
-            printon = false;
-            arduino_event = 0;
-            marlin_event = 0;
-            sendEvent();
-          }
-        }
-      }
-    }
-    else if (printingIsPaused()) // in stampa o pausa, disattiva tasti e funzioni lampeggio
-    {
-      if (printon != false)
-        printon = false;
-      if (printpause == false)
-      {
-        arduino_event = 21;
-        marlin_event = 21;
-        sendEvent();
-        printpause = true;
       }
     }
   }
-  
-    if (fanon == false) // avvio e spegnimento fan
+  else if (printingIsPaused())
+  {
+    if (printon != false)
+      printon = false;
+    if (printpause == false)
     {
-      if (thermalManager.degHotend(active_extruder) > 50) // avvio fan hotend > 50 gradi
+      arduino_event = 205;
+      marlin_event = 205;
+      sendEvent();
+      printpause = true;
+    }
+  }
+
+  if (fanon == false) // avvio e spegnimento fan
+  {
+    if (thermalManager.degHotend(active_extruder) > 50) // avvio fan hotend > 50 gradi
+    {
+      marlin_event = 6;
+      sendEvent();
+      fanon = true;
+      if (thermalManager.degTargetHotend(active_extruder) > 0)
       {
-        marlin_event = 26;
-        sendEvent();
-        fanon = true;
-        if (thermalManager.degTargetHotend(active_extruder) > 0)
+        if (printon == true)
         {
-          if(printon == true)
+          marlin_event = 220;
+          sendEvent();
+        }
+        else if (arduino_event == 0 || arduino_event == 180)
+        {
+          if (ardumod == false)
           {
+            marlin_event = 103;
+            sendEvent();
+          }
+        }
+        else if (arduino_event == 20)
+        {
           marlin_event = 20;
           sendEvent();
-          }
-          else
-          {       
-          marlin_event = 25;
-          sendEvent();
-           }
         }
-   
+        else if (arduino_event == 30)
+        {
+          marlin_event = 30;
+          sendEvent();
+        }
       }
     }
-    else
+  }
+  else if (fanon == true)
+  {
+    if (thermalManager.degHotend(active_extruder) < 50 && thermalManager.degTargetHotend(active_extruder) == 0)
+    // stop fan hotend < 50 gradi
     {
-      if (thermalManager.degHotend(active_extruder) < 50 && thermalManager.degTargetHotend(active_extruder) == 0)
-         // stop fan hotend < 50 gradi
-      {
-        marlin_event = 27;
-        sendEvent();
-        fanon = false;
-        marlin_event = 0;
-        sendEvent();
-      }
-    }   
- 
+      marlin_event = 7;
+      sendEvent();
+      fanon = false;
+      arduino_event = 0;
+    }
+  }
+
 #endif // SANDOR MOD V3 ^^^^
 
 #ifdef MAX7219_DEBUG_PROFILE
