@@ -490,6 +490,7 @@ void startOrResumeJob() {
           }
           if (ardumod == true)
             ardumod = false;
+            
           LCD_MESSAGE(WELCOME_MSG);
           marlin_event = 0;
           sendEvent();
@@ -534,7 +535,7 @@ void startOrResumeJob() {
           sendEvent();
           break;
 
-        case 20: // sta scaldando
+        case 20: // attende target e invia comando estrude
           if (thermalManager.degHotend(active_extruder) >= thermalManager.degTargetHotend(active_extruder))
           {
             LCD_MESSAGE(MSG_EXTRUDE);
@@ -548,7 +549,7 @@ void startOrResumeJob() {
           }
           break;
 
-        case 21: // target temperatura caldo
+        case 21: // estrusione in corso
           if (!planner.has_blocks_queued())
           {
             if (current_position.e == destination.e)
@@ -558,7 +559,7 @@ void startOrResumeJob() {
           }
           break;
 
-        case 22: // estrusione in corso
+        case 22: // dopo estrusione resta caldo
           LCD_MESSAGE(MSG_PLEASE_WAIT);
           marlin_event = 23;
           sendEvent();
@@ -586,7 +587,7 @@ void startOrResumeJob() {
           sendEvent();
           break;
 
-        case 30: // sta scaldando
+        case 30: // // attende target e invia comando estrude
           if (thermalManager.degHotend(active_extruder) >= thermalManager.degTargetHotend(active_extruder))
           {
             LCD_MESSAGE(MSG_EXTRUDE);
@@ -600,7 +601,7 @@ void startOrResumeJob() {
           }
           break;
 
-        case 31: // target temperatura caldo
+        case 31: // estrusione in corso
           if (!planner.has_blocks_queued())
           {
             if (current_position.e == destination.e)
@@ -610,21 +611,21 @@ void startOrResumeJob() {
           }
           break;
 
-        case 32: // attesa fine estrusione
+        case 32: // dopo estrusione resta caldo
           tempo = (millis() + 120000UL);
           LCD_MESSAGE(MSG_USERWAIT);
           marlin_event = 33;
           sendEvent();
           break;
 
-        case 33: //  attende comando o spegne dopo 2 minuti
+        case 33: //  attende comando ripeti o annulla, spegne dopo 2 minuti
           if (tempo < millis())
           {
             arduino_event = 0;
           }
           else
           {
-            captureEvent(); // attende comando annulla
+            captureEvent(); // attende comandi ripeti (+) o spegni (home)
           }
           break;
         default:
@@ -634,7 +635,6 @@ void startOrResumeJob() {
       case 35: // estrude nuovamente
         ardumod = true;
         {
-
           marlin_event = 35;
           sendEvent();
           arduino_event = 30;
@@ -647,7 +647,7 @@ void startOrResumeJob() {
         {
         case 0:
 
-          if (!all_axes_homed()) // se non conosce gli assi va in auto home altrimenti alza asse z di 10 mm
+          if (!all_axes_trusted()) // se non conosce gli assi va in auto home altrimenti alza asse z di 10 mm
           {
             LCD_MESSAGE(MSG_AUTO_HOME);
             queue.inject_P(G28_STR);
@@ -739,13 +739,13 @@ void startOrResumeJob() {
         }
       case 50: // PLAY BUTTON LONG PRESS
         ardumod = true;
-        if (all_axes_homed())
+        if (all_axes_trusted())
         {
           if (marlin_event == 0) // avvio funzione livellamento
           {
             arduino_event = 45;
           }
-          else // annulla operazione livellamento e XYZ_HOME
+          else // annulla operazione livellamento e va in auto HOME
           {
             calibra = false;
             LCD_MESSAGE(MSG_AUTO_HOME);
@@ -757,11 +757,10 @@ void startOrResumeJob() {
             }
           }
         }
-        else // se non li conosce trova XYZ_HOME dopo avvia livellamento
+        else // se non conosce gli assi va in auto HOME e dopo avvia livellamento
         {
           LCD_MESSAGE(MSG_AUTO_HOME);
           queue.inject_P(G28_STR);
-
           if (marlin_event == 0) // avvio funzione livellamento
           {
             arduino_event = 45;
@@ -1431,10 +1430,9 @@ void idle(bool no_stepper_sleep/*=false*/) {
       }
     }
   }
-  else if (fanon == true)
+  else // stop fan hotend < 50 gradi
   {
-    if (thermalManager.degHotend(active_extruder) < 50 && thermalManager.degTargetHotend(active_extruder) == 0)
-    // stop fan hotend < 50 gradi
+    if (thermalManager.degHotend(active_extruder) < 50 && thermalManager.degTargetHotend(active_extruder) == 0)  
     {
       marlin_event = 7;
       sendEvent();
