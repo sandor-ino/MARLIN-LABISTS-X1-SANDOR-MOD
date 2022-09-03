@@ -1,4 +1,4 @@
-/// sketch arduino - SANDOR MOD V3 06_2022 - LABISTS X1
+/// sketch arduino - SANDOR MOD V3 09_2022 - LABISTS X1
 
 #ifndef riferimenti
 
@@ -6,6 +6,7 @@
 #include <OneButton.h>
 #include <RGB_LIB.h> // libreria personalizzata
 #include <Wire.h>
+#include <avr/wdt.h>
 
 RGB_LIB RGB_LED(3, 5, 6, 0);
 
@@ -17,8 +18,8 @@ ezOutput PLAY_LED(14);  // PIN A0
 OneButton HOME_BUT(7, true);
 OneButton MINUS_BUT(8, true);
 OneButton PLUS_BUT(12, true);
-// OneButton PLAY_BUT(13, true);
-OneButton PLAY_BUT(4, true); // for my pcb
+OneButton PLAY_BUT(13, true);
+// OneButton PLAY_BUT(4, true); // for my pcb
 
 // Output pin to transistor base
 int ESP_Pin = 2;   // NO PWM
@@ -119,6 +120,7 @@ void setup()
     intro++;
   }
 #endif // intro
+wdt_reset(); // restart arduino setup()
 }
 
 void requestEvent() // risponde a richiesta da marlin
@@ -170,8 +172,9 @@ void homeClick() //  comando Z-HOME, annulla comando carica filamento (tasto plu
   }
 }
 
-void homeClick_longPress() // ??? DA IMPLEMENTARE
+void homeClick_longPress() // reset arduino setup()
 {
+  wdt_enable(WDTO_30MS);
 }
 
 void homeClick_DoubleClick() // ??? DA IMPLEMENTARE
