@@ -32,7 +32,6 @@ int stileRGB = 1;
 
 bool LED1_ON = false;
 bool LED2_ON = false;
-bool ESP01_ON = true;
 
 #endif // riferimenti
 
@@ -43,7 +42,7 @@ void setup()
   Wire.onRequest(requestEvent);
 
   HOME_BUT.attachClick(homeClick);
-  HOME_BUT.attachLongPressStart(homeClick_longPress);
+  HOME_BUT.attachLongPressStop(homeClick_longPress);
   HOME_BUT.attachDoubleClick(homeClick_DoubleClick);
   MINUS_BUT.attachClick(minusClick);
   PLUS_BUT.attachClick(plusClick);
@@ -56,16 +55,10 @@ void setup()
   pinMode(LED1_Pin, OUTPUT);
   pinMode(LED2_Pin, OUTPUT);
 
-  // Make sure transistor is off
-  //  digitalWrite(ESP_Pin, LOW);
-  //  digitalWrite(FAN_Pin, LOW);
-  //  digitalWrite(LED1_Pin, LOW);
-  //  digitalWrite(LED2_Pin, LOW);
-
   digitalWrite(ESP_Pin, HIGH);
   digitalWrite(FAN_Pin, LOW);
-  // digitalWrite(LED1_Pin, HIGH);
-  // digitalWrite(LED2_Pin, HIGH);
+  digitalWrite(LED1_Pin, LOW);
+  digitalWrite(LED2_Pin, LOW);
 
 #ifndef intro
   int intro = 0;
@@ -177,24 +170,12 @@ void homeClick() //  comando Z-HOME, annulla comando carica filamento (tasto plu
   }
 }
 
-void homeClick_longPress() // ??? annulla tutti comandi da implementare
+void homeClick_longPress() // ??? DA IMPLEMENTARE
 {
-  arduino_event = 0;
 }
 
-void homeClick_DoubleClick() // da fermo spegne o accende scheda ESP01S
+void homeClick_DoubleClick() // ??? DA IMPLEMENTARE
 {
-  if (arduino_event == 0 && marlin_event == 0)
-  {
-    if (ESP01_ON == true)
-    {
-      digitalWrite(ESP_Pin, LOW);
-      ESP01_ON = false;
-    }
-    else
-      digitalWrite(ESP_Pin, HIGH);
-    ESP01_ON = true;
-  }
 }
 
 void minusClick() // comando espelle filamento, cambia effetto RGB LED in stampa
