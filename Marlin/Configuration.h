@@ -2242,7 +2242,7 @@
  *
  * Use CRC checks and retries on the SD communication.
  */
-//#define SD_CHECK_AND_RETRY /// SANDOR MOD ///
+#define SD_CHECK_AND_RETRY /// SANDOR MOD ///
 
 /**
  * LCD Menu Items
@@ -2282,7 +2282,7 @@
 //
 //  Set this option if CLOCKWISE causes values to DECREASE
 //
-//#define REVERSE_ENCODER_DIRECTION // ??? //
+//#define REVERSE_ENCODER_DIRECTION
 
 //
 // This option reverses the encoder direction for navigating LCD menus.
@@ -3087,7 +3087,7 @@
 // (ms) Delay before the next move will start, to give the servo time to reach its target angle.
 // 300ms is a good value but you can try less delay.
 // If the servo can't reach the requested position, increase it.
-#define SERVO_DELAY { 500 } /// ??? ///
+#define SERVO_DELAY { 500 } /// SANDOR MOD ??? ///
 
 // Only power servos during movement, otherwise leave off to prevent jitter
 //#define DEACTIVATE_SERVOS_AFTER_MOVE

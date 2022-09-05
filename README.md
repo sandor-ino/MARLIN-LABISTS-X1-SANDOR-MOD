@@ -7,7 +7,7 @@ VIDEO TEST LINK:
 
 NEW VERSION V3: WiFi works with ESP01S and ESP3D Firmware, Led Lighting Object in Print, Automatic ON/OFF fan hotend box (normally always on)
 
-SANDOR MOD V3 8_2022
+SANDOR MOD V3 9_2022
 FAN, BED, LCD + ENCODER, ARDUINO, RGB LED, 4 Darlington transistor, dcdc converter, ESP01S_1M
 
 CUSTOM BUTTON FUNCTION
