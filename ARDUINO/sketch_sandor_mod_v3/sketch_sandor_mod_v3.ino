@@ -519,7 +519,7 @@ void loop()
       PLUS_LED.loop();
       PLAY_LED.blink(500, 500);
       PLAY_LED.loop();
-      RGB_LED.pulse("R");
+      RGB_LED.fade("RGB");
     }
     else if (marlin_event == 210) // letto in riscaldamento
     {
