@@ -2,7 +2,7 @@
 
 Custom firmware Mod V3 MARLIN bugfix-2.1.X for LABISTS X1 mini 3d printer  with some changes in Malin code,  is possible to  EASYTHREED X1, K1 and SONDORI PICO printer with  ET4000 V2 card
 
-VIDEO TEST LINK:
+VIDEO TEST LINK: https://youtu.be/csIqN8K5dlU
 ---------------
 
 NEW VERSION V3: WiFi works with ESP01S and ESP3D Firmware, Led Lighting Object in Print, Automatic ON/OFF fan hotend box (normally always on)
@@ -35,8 +35,11 @@ During the procedure if you press long, you stop the sequence, and the axes go t
 use the function only to rectify manual calibration to avoid of ruining the bed
 
 special function:
-During printing by pressing the + or - change the RGB LED effect
+1 - During printing by pressing the + or - change the RGB LED effect
 There are 8 possibilities of choice including off, You can change RGB.Lib library for different effects
+2 - button play double click to turn on/off the LED
+3 - button home long press restart arduino (experimental)
+
 
 ![alt text](https://github.com/sandor-ino/MARLIN-2.0.8-LABISTS-X1-SANDOR-MOD/blob/SANDOR-MOD-V3/PINOUT%20sandor%20mod%20v3.jpg)
 ![alt text](https://github.com/sandor-ino/MARLIN-2.0.8-LABISTS-X1-SANDOR-MOD/blob/SANDOR-MOD-V3/ESP01S%20SETUP%20PINOUT.jpg)
