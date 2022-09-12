@@ -31,6 +31,6 @@ use function only to rectify manual calibration to avoid of ruining bed
 
 note:
 
-    A minimum 60 w power supply is required if the hot bed is installed
+    A minimum 60 w power supply is required if hot bed is installed
 
 ![alt text](https://github.com/sandor-ino/MARLIN-2.0.8-LABISTS-X1-SANDOR-MOD/blob/5_2021/w_PINOUT%20sandor%20mod%20V1.jpg)
