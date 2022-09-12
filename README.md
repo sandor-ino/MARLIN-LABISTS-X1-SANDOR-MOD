@@ -10,7 +10,6 @@ FAN, BED, LCD + ENCODER, ARDUINO, RGB LED
 CUSTOM BUTTONS FUNCTIONS
 
 - HOME BUTTON
-- Pressed for a short time:
 Z axis in Home position and deactivates the Motor Stepper X and Y (manual flat calibration)
 - MINUS BUTTON
 After heating extracts filament and automatically turn off extruder
