@@ -9,13 +9,11 @@ with ET4000 V2 card
 
 SANDOR MOD 5_2021 FAN, BED, LCD + ENCODER, CUSTOM BUTTON FUNCTION
 
-CUSTOM BUTTON FUNCTION
+CUSTOM BUTTONS FUNCTIONS
 
 - HOME BUTTON
-(1)- Pressed for a short time:
+- Pressed for a short time:
 Z axis in Home position and deactivates the Motor Stepper X and Y (manual flat calibration)
-(2)- Long pressed:
-Reset Arduino controls (to optimize) 
 - MINUS BUTTON
 After heating extracts filament and automatically turn off extruder
 - PLUS BUTTON
