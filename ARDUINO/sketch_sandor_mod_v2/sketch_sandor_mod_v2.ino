@@ -1,9 +1,11 @@
-/// sketch arduino - SANDOR MOD V2 11_2021 - LABISTS X1
+/// sketch arduino - SANDOR MOD V2.1 9_2022 - LABISTS X1
 
+#ifndef riferimenti
 #include <ezOutput.h>
 #include <OneButton.h>
 #include <RGB_LIB.h> // libreria personalizzata
 #include <Wire.h>
+#include <avr/wdt.h>
 
 RGB_LIB RGB_LED(3, 5, 6, 0);
 
@@ -17,10 +19,11 @@ OneButton MINUS_BUT(8, true);
 OneButton PLUS_BUT(9, true);
 OneButton PLAY_BUT(10, true);
 
-volatile int stato = 0;
-volatile int key_flag = 0;
+volatile byte arduino_event = 0;
+volatile byte marlin_event = 0;
 int stileRGB = 1;
 
+#endif // riferimenti
 void setup()
 {
   Wire.begin(8);
@@ -29,11 +32,12 @@ void setup()
 
   HOME_BUT.attachClick(homeClick);
   HOME_BUT.attachLongPressStart(homeClick_longPress);
-
+  HOME_BUT.attachDoubleClick(homeClick_DoubleClick);
   MINUS_BUT.attachClick(minusClick);
   PLUS_BUT.attachClick(plusClick);
   PLAY_BUT.attachClick(playClick);
   PLAY_BUT.attachLongPressStart(playClick_longPress);
+
 #ifndef intro
   int intro = 0;
   HOME_LED.high();
@@ -92,73 +96,76 @@ void setup()
 
     intro++;
   }
-#endif //intro
+#endif         // intro
+  wdt_reset(); // restart arduino setup()
 }
 
 void requestEvent() // risponde a richiesta da marlin
 {
-  Wire.write(key_flag);
+  Wire.write(arduino_event);
 }
 
 void receiveEvent(int howMany) // riceve stato da marlin
 {
   while (Wire.available())
   {
-    stato = Wire.read(); /// riceve evento
+    marlin_event = Wire.read(); /// riceve evento
   }
-  /// spegne tutti i led
-  HOME_LED.high();
-  MINUS_LED.high();
-  PLUS_LED.high();
-  PLAY_LED.high();
-  RGB_LED.setColor(0, 0, 0);
-
-  if (stato == 0 || stato == 6 || stato == 7) // comandi marlin stop , print, pause
+  if (marlin_event == 0 || marlin_event == 200 || marlin_event == 201 || marlin_event == 202 || marlin_event == 203 || marlin_event == 205 || marlin_event == 210 || marlin_event == 220) // in stampa
   {
-    key_flag = stato;
+    arduino_event = marlin_event;
   }
-  else if (key_flag == 8) /// ripeti estrusione
+  else if (marlin_event == 35) // estrude nuovamente
   {
-    key_flag = 3;
+    arduino_event = 30;
   }
-  else if (key_flag == 9) /// punto successivo livellamento piatto
+  else if (arduino_event == 50 || marlin_event == 42) /// avvia livellamento piatto
   {
-    key_flag = 4;
-  }
-  else if (key_flag == 5 && stato == 2) /// avvia livellamento piatto
-  {
-    key_flag = 4;
+    arduino_event = 40;
   }
 }
 
 void homeClick() //  comando Z-HOME, annulla comando estrusione (plus)
 {
-  if (key_flag != 0 && key_flag != 1 && key_flag != 3)
+  if (arduino_event != 0 && arduino_event != 20 && arduino_event != 30)
     return;
 
-  if ((key_flag == 3 && stato == 3)) // spegne e raffredda con comando estruisione attivo
+  if (marlin_event == 20 || marlin_event == 30 || marlin_event == 33 || marlin_event == 103 || marlin_event == 104) // spegne e raffredda
   {
-    key_flag = 0;
+    arduino_event = 0;
   }
   else
   {
-    key_flag = 1;
+    arduino_event = 10;
   }
 }
 
 void homeClick_longPress() // annulla tutti comandi da implementare
 {
-  if (key_flag == 6 || key_flag == 7)
-    return;
-  key_flag = 0;
+  wdt_enable(WDTO_30MS);
+}
+void homeClick_DoubleClick() // ??? DA IMPLEMENTARE
+{
 }
 
 void minusClick() // comando espelle filamento, cambia effetto RGB LED in stampa
 {
-  if (key_flag != 0 && key_flag != 2 && key_flag != 6)
+  if (arduino_event != 0 && arduino_event != 20 && arduino_event != 200 && arduino_event != 201 && arduino_event != 202 && arduino_event != 203)
     return;
 
-  if (key_flag == 6) /// cambia effetto RGB in stampa
+  switch (marlin_event) // avvia funzione carica filamento
+  {
+  case 0: // avvia funzione riscadamento
+    arduino_event = 20;
+    break;
+  case 20: // in riscaldamento sepegne annulla
+    arduino_event = 0;
+    break;
+
+  default:
+    break;
+  }
+  if (arduino_event == 200 || arduino_event == 201 || arduino_event == 202 || arduino_event == 203) /// cambia effetto RGB in stampa
   {
     if (stileRGB >= 1 && stileRGB <= 8)
     {
@@ -171,37 +178,31 @@ void minusClick() // comando espelle filamento, cambia effetto RGB LED in stampa
       stileRGB = 8;
     }
   }
-
-  else
-  {
-    if (key_flag == 2 && stato == 1) // spegne se sta riscaldando
-    {
-      key_flag = 0;
-    }
-    else
-    {
-      key_flag = 2; // comando espelli
-    }
-  }
 }
 
 void plusClick() // comando estrudi filamento, cambia effetto RGB LED in stampa
 {
-  if (key_flag != 0 && key_flag != 3 && key_flag != 6)
+  if (arduino_event != 0 && arduino_event != 30 && arduino_event != 200 && arduino_event != 201 && arduino_event != 202 && arduino_event != 203)
     return;
 
-  switch (stato)
+  switch (marlin_event) // avvia funzione carica filamento
   {
   case 0: // avvia funzione riscadamento
-    key_flag = 3;
+    arduino_event = 30;
     break;
-  case 1: // in riscaldamento sepegne annulla
-    key_flag = 0;
+  case 30: // in riscaldamento sepegne annulla
+    arduino_event = 0;
     break;
-  case 3: // riscaldato ripete estrusione
-    key_flag = 8;
+  case 33: // riscaldato ripete estrusione
+    arduino_event = 35;
     break;
-  case 6: // in stampa cambia stile rgb
+
+  default:
+    break;
+  }
+
+  if (arduino_event == 200 || arduino_event == 201 || arduino_event == 202 || arduino_event == 203) /// cambia effetto RGB in stampa
+  {
     if (stileRGB >= 1 && stileRGB <= 8)
     {
       RGB_LED.setColor(0, 0, 0);
@@ -212,33 +213,61 @@ void plusClick() // comando estrudi filamento, cambia effetto RGB LED in stampa
       RGB_LED.setColor(0, 0, 0);
       stileRGB = 1;
     }
-
-    break;
-  default:
-    break;
   }
 }
 
 void playClick() // comando XYZ-HOME, comando Z + 10 mm, punto successiovo in livellamento
 {
-  if (key_flag != 0 && key_flag != 4)
+  if (arduino_event != 0 && arduino_event != 40)
     return;
-
-  if (key_flag == 0)
+  if (marlin_event == 42)
   {
-    key_flag = 4; // comando XYZ-HOME, comando Z + 10 mm
+    arduino_event = 45; // nuovo punto livellamento piatto
   }
-  else if (key_flag == 4 && stato == 2)
+  else
   {
-    key_flag = 9; // nuovo punto livellamento piatto
+    arduino_event = 40; // comando XYZ-HOME, comando Z + 10 mm
   }
 }
 
 void playClick_longPress() /// avvio funzione livellamento piatto, annulla funzione livellamento piatto
 {
-  if (key_flag != 0 && key_flag != 4)
+  if (arduino_event != 0 && arduino_event != 40)
     return;
-  key_flag = 5;
+  arduino_event = 50;
+}
+
+void STILERGB() // effetti RGB durante stampa
+{
+  switch (stileRGB) // cambio effetto RGB durante stampa tasti più e meno
+  {
+  case 1:
+    RGB_LED.fadeRainbow();
+    break;
+  case 2:
+    RGB_LED.fade("RGB");
+    break;
+  case 3:
+    RGB_LED.fade("RG");
+    break;
+  case 4:
+    RGB_LED.fade("RB");
+    break;
+  case 5:
+    RGB_LED.fade("GB");
+    break;
+  case 6:
+    RGB_LED.blink("red");
+    break;
+  case 7:
+    RGB_LED.pulse("R");
+    break;
+  case 8:
+    RGB_LED.blink("blue");
+    break;
+  default:
+    break;
+  }
 }
 
 void loop()
@@ -249,8 +278,9 @@ void loop()
   PLUS_BUT.tick();
   PLAY_BUT.tick();
 
-  if (stato == 0 && key_flag == 0)
+  if (marlin_event == 0 && arduino_event == 0) // stato spento
   {
+    // spegne tutti i led
     HOME_LED.high();
     MINUS_LED.high();
     PLUS_LED.high();
@@ -260,68 +290,85 @@ void loop()
   }
   else
   {
-    if (key_flag == 1) // BUTTON HOME
+    // comandi arduino
+    if (arduino_event == 10) // BUTTON HOME
     {
-      if (stato == 1)
+      if (marlin_event == 10)
       {
         HOME_LED.blink(100, 100);
         HOME_LED.loop();
         RGB_LED.blink("green");
       }
-    }
-    else if (key_flag == 2) // BUTTON MINUS
-    {
-      switch (stato)
+      else
       {
-      case 1: // preriscaldamento
-        MINUS_LED.blink(100, 100);
-        RGB_LED.pulse("B");
-        break;
-      case 2: // estrusione
-        MINUS_LED.blink(200, 200);
-        RGB_LED.blink("red");
-        break;
-      case 3: // caldo
-        MINUS_LED.blink(100, 100);
-        RGB_LED.pulse("R");
-        break;
-      default:
-        break;
+        HOME_LED.low();
       }
-      MINUS_LED.loop();
     }
-    else if (key_flag == 3) // BUTTON PLUS
+    else if (arduino_event == 20) // BUTTON MINUS
     {
-      switch (stato)
+      if (marlin_event == 0)
       {
-      case 1: // preriscaldamento
-        PLUS_LED.blink(100, 100);
-
-        RGB_LED.pulse("B");
-        break;
-      case 2: // estrusione
-        PLUS_LED.blink(200, 200);
-        RGB_LED.blink("red");
-        break;
-      case 3: // caldo
-        PLUS_LED.blink(150, 150);
-        RGB_LED.pulse("R");
-        break;
-
-      default:
-        break;
+        MINUS_LED.low();
       }
-      PLUS_LED.loop();
-    }
-    else if (key_flag == 4) // BUTTON PLAY
-    {
-      switch (stato)
+      else
       {
-      case 1: // auto home
+        switch (marlin_event)
+        {
+        case 20: // preriscaldamento
+          MINUS_LED.blink(100, 100);
+          RGB_LED.blink("red");
+          break;
+        case 21: // estrusione
+          MINUS_LED.blink(200, 200);
+          RGB_LED.blink("violet");
+          break;
+        case 23: // riscaldato
+          MINUS_LED.blink(500, 500);
+          RGB_LED.pulse("R");
+          break;
+        default:
+          break;
+        }
+        MINUS_LED.loop();
+      }
+    }
+    else if (arduino_event == 30) // BUTTON PLUS
+    {
+      if (marlin_event == 0)
+      {
+        PLUS_LED.low();
+      }
+      else
+      {
+        switch (marlin_event)
+        {
+        case 30: // preriscaldamento
+          PLUS_LED.blink(100, 100);
+          RGB_LED.blink("red");
+          break;
+        case 31: // estrusione
+          PLUS_LED.blink(200, 200);
+          RGB_LED.blink("violet");
+          break;
+        case 33: // riscaldato
+          PLUS_LED.blink(500, 500);
+          RGB_LED.pulse("R");
+          break;
+        default:
+          break;
+        }
+        PLUS_LED.loop();
+      }
+    }
+    else if (arduino_event == 40) // BUTTON PLAY
+    {
+      switch (marlin_event)
+      {
+      case 41: // auto home
         PLAY_LED.blink(100, 100);
         RGB_LED.blink("green");
         break;
-      case 2: // posizione livellamenro
+      case 42: // posizione livellamenro
         PLAY_LED.blink(300, 300);
         RGB_LED.blink("blue");
         break;
@@ -330,67 +377,100 @@ void loop()
       }
       PLAY_LED.loop();
     }
-    else if (key_flag == 6) // IN PRINTING
-    {
-      PLAY_LED.blink(200, 200);
-      PLAY_LED.loop();
 
-      switch (stileRGB) // cambio effetto RGB durante stampa
-      {
-      case 1:
-        RGB_LED.fadeRainbow();
-        break;
-      case 2:
-        RGB_LED.fade("RGB");
-        break;
-      case 3:
-        RGB_LED.fade("RG");
-        break;
-      case 4:
-        RGB_LED.fade("RB");
-        break;
-      case 5:
-        RGB_LED.fade("GB");
-        break;
-      case 6:
-        RGB_LED.blink("red");
-        break;
-      case 7:
-        RGB_LED.pulse("G");
-        break;
-      case 8:
-        RGB_LED.blink("blue");
-        break;
-      default:
-        break;
-      }
-    }
-    else if (key_flag == 7) // IN PAUSE
+    // non in stampa o pausa
+    if (marlin_event == 100) // MOVIMENTO ASSI
     {
-      PLAY_LED.blink(500, 500);
-      PLAY_LED.loop();
-      RGB_LED.pulse("R");
-    }
-    /// da sviluppare stato da marlin
-    else if (key_flag == 11) // ASSI IN MOVIMENTO
-    {
-      PLAY_LED.loop();
       RGB_LED.blink("green");
     }
-    else if (key_flag == 12) // LETTO IN RISCALDAMENTO
+    else if (marlin_event == 101) // LETTO IN RISCALDAMENTO
     {
+      RGB_LED.blink("blue");
+    }
+    else if (marlin_event == 102) // LETTO CALDO
+    {
+      RGB_LED.pulse("B");
+    }
+    else if (marlin_event == 103) // UGELLO IN RISCALDAMENTO
+    {
+      RGB_LED.blink("red");
+    }
+    else if (marlin_event == 104) // UGELLO CALDO
+    {
+      RGB_LED.pulse("R");
+    }
+    else if (marlin_event == 105) // ESPELLE RETRAE FILAMENTO
+    {
+      RGB_LED.blink("Violet");
+    }
+
+    // in stampa o pausa
+    else if (marlin_event == 200) // da 100 % a 75 % 4 led accesi
+    {
+
+      HOME_LED.low();
+      MINUS_LED.low();
+      PLUS_LED.low();
+      PLAY_LED.blink(200, 200);
+      PLAY_LED.loop();
+      STILERGB();
+    }
+    else if (marlin_event == 201) // da 75 % a 50 % 3 led accesi
+    {
+      HOME_LED.high();
+      MINUS_LED.low();
+      PLUS_LED.low();
+      PLAY_LED.blink(200, 200);
+      PLAY_LED.loop();
+      STILERGB();
+    }
+    else if (marlin_event == 202) // da 50 % a 25 % 2 led accesi
+    {
+      HOME_LED.high();
+      MINUS_LED.high();
+      PLUS_LED.low();
+      PLAY_LED.blink(200, 200);
+      PLAY_LED.loop();
+      STILERGB();
+    }
+    else if (marlin_event == 203) // da 25 % a 0 % 1 led acceso
+    {
+      HOME_LED.high();
+      MINUS_LED.high();
+      PLUS_LED.high();
+      PLAY_LED.blink(200, 200);
+      PLAY_LED.loop();
+      STILERGB();
+    }
+    else if (marlin_event == 205) // IN PAUSE
+    {
+      HOME_LED.blink(500, 500);
+      HOME_LED.loop();
+      MINUS_LED.blink(500, 500);
+      MINUS_LED.loop();
+      PLUS_LED.blink(500, 500);
+      PLUS_LED.loop();
+      PLAY_LED.blink(500, 500);
+      PLAY_LED.loop();
+      RGB_LED.fade("RGB");
+    }
+    else if (marlin_event == 210) // letto in riscaldamento
+    {
+      HOME_LED.low();
+      MINUS_LED.low();
+      PLUS_LED.low();
+      PLAY_LED.blink(200, 200);
       PLAY_LED.loop();
       RGB_LED.blink("blue");
     }
-    else if (key_flag == 13) // UGELLO IN RISCALDAMENTO
+    else if (marlin_event == 220) // hotend in riscaldamento
     {
+      HOME_LED.low();
+      MINUS_LED.low();
+      PLUS_LED.low();
+      PLAY_LED.blink(200, 200);
       PLAY_LED.loop();
       RGB_LED.blink("red");
-    }
-    else if (key_flag == 14) // UGELLO CALDO
-    {
-      PLAY_LED.loop();
-      RGB_LED.pulse("R");
     }
   }
 }
