@@ -7,13 +7,11 @@ https://youtu.be/KjyCzkallvk
 SANDOR MOD V2 11_2021
 FAN, BED, LCD + ENCODER, ARDUINO, RGB LED
 
-CUSTOM BUTTON FUNCTION
+CUSTOM BUTTONS FUNCTIONS
 
 - HOME BUTTON
-(1)- Pressed for a short time:
+- Pressed for a short time:
 Z axis in Home position and deactivates the Motor Stepper X and Y (manual flat calibration)
-(2)- Long pressed:
-Reset Arduino controls (to optimize) 
 - MINUS BUTTON
 After heating extracts filament and automatically turn off extruder
 - PLUS BUTTON
