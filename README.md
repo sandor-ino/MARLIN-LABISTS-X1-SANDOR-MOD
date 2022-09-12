@@ -5,15 +5,15 @@ Custom firmware Mod V3 MARLIN bugfix-2.1.X for LABISTS X1 mini 3d printer  with 
 VIDEO TEST LINK: https://youtu.be/csIqN8K5dlU
 ---------------
 
+SANDOR MOD V3 9_2022
+FAN, BED, LCD + ENCODER, ARDUINO, RGB LED, 4 Darlington transistor, dcdc converter, ESP01S_1M
+
 NEW VERSION V3: WiFi works with ESP01S and ESP3D Firmware, Led Lighting Object in Print, Automatic ON/OFF fan hotend box (normally always on)
 
 NOTE:
 - !!! Adjust 3.3V converter DCDC before connecting ESP01S !!!
 - first time connect to ESP01 network and configure the GUI, the multilingual files are in folder .../Languages/.../ (Index.html) - https://github.com/luc-github/ESP3D/blob/2.1.x/README.md
 - The Repetier-Host + Prusaslicer pairing works well
-
-SANDOR MOD V3 9_2022
-FAN, BED, LCD + ENCODER, ARDUINO, RGB LED, 4 Darlington transistor, dcdc converter, ESP01S_1M
 
 CUSTOM BUTTONS FUNCTIONS
 
