@@ -543,7 +543,6 @@ void startOrResumeJob() {
           break;
 
         case 22: // dopo estrusione resta caldo
-          LCD_MESSAGEPGM(MSG_PLEASE_WAIT);
           marlin_event = 23;
           sendEvent();
           tempo = (millis() + 5000UL);
@@ -1554,7 +1553,7 @@ void stop() {
 
   if (!IsStopped()) {
     SERIAL_ERROR_MSG(STR_ERR_STOPPED);
-    LCD_MESSAGEPGMPGM(MSG_STOPPED);
+    LCD_MESSAGEPGM(MSG_STOPPED);
     safe_delay(350);       // allow enough time for messages to get out before stopping
     marlin_state = MF_STOPPED;
   }
