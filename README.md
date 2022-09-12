@@ -29,11 +29,10 @@ Start Calibration procedure with placement of bed automatic with 5 points X - Y.
 Press normally by next step 1 - 80 x 80, 2 - 80 x 20, 3 - 20 x 80, 4 - 20 x 20, 5 - 50 x 50
 Complete procedure with all axes in Home
 During procedure if you press long, you stop sequence, and axes go to home, 
-use function only to rectify manual calibration to avoid of ruining bedome, 
-use the function only to rectify manual calibration to avoid of ruining the bed
+use function only to rectify manual calibration to avoid of ruining bed
 
 special function:
-During printing by pressing the + or - change the RGB LED effect
-There are 8 possibilities of choice including off, modifying the RGB.Lib library the desired effects are obtained 
+During printing by pressing + or - change RGB LED effects
+There are 8 possibilities of choice including off, modifying RGB.Lib library desired effects are obtained 
 
 ![alt text](https://github.com/sandor-ino/MARLIN-2.0.8-LABISTS-X1-SANDOR-MOD/blob/SANDOR-MOD-V2/PINOUT%20sandor%20mod%20v2.jpg)
