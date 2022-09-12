@@ -29,7 +29,11 @@ During procedure if you press long, you stop sequence, and axes go to home,
 use function only to rectify manual calibration to avoid of ruining bed
 
 special function:
-During printing by pressing + or - change RGB LED effects
+- During printing by pressing + or - change RGB LED effects
 There are 8 possibilities of choice including off, modifying RGB.Lib library desired effects are obtained 
+
+- NEW - button home long press restart arduino (experimental)
+- NEW - During printing LED buttons turn off in sequence 4321
+- NEW - RGB LED responds to axes movement with green color, red for Hotend, blue for bed
 
 ![alt text](https://github.com/sandor-ino/MARLIN-2.0.8-LABISTS-X1-SANDOR-MOD/blob/SANDOR-MOD-V2/PINOUT%20sandor%20mod%20v2.jpg)
